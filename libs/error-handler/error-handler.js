@@ -1,4 +1,4 @@
-const { logger } = require('@fantasy-stock/logging');
+const { logger } = require('../logging/logging')
 
 // Custom error classes
 class AppError extends Error {
@@ -7,7 +7,7 @@ class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = isOperational;
     this.name = this.constructor.name;
-    
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -114,7 +114,7 @@ process.on('uncaughtException', (err) => {
     error: err.message,
     stack: err.stack
   });
-  
+
   process.exit(1);
 });
 
@@ -124,7 +124,7 @@ process.on('unhandledRejection', (err) => {
     error: err.message,
     stack: err.stack
   });
-  
+
   process.exit(1);
 });
 

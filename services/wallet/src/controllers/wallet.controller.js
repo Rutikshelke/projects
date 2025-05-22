@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const Wallet = require('../models/Wallet');
+const Wallet = require('../models/Wallet.model');
 const { logger } = require('../../../../libs/logging/logging');
 const { ValidationError, NotFoundError, ConflictError, asyncHandler } = require('../../../../libs/error-handler/error-handler');
 

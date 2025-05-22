@@ -1,22 +1,40 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const redis = require('redis');
-require('dotenv').config();
+const express = require("express");
 
+const app = express();
+
+const cors = require("cors");
+
+const path = require("path");
+
+const morgan = require("morgan");
+
+const cookieParser = require("cookie-parser");
+
+const helmet = require('helmet');
+
+const rateLimit = require('express-rate-limit');
+
+const redis = require('redis');
+
+require("dotenv").config({ path: ".env" });
+
+// Importing and using various 
 const authRoutes = require('./routes/authRoutes');
 const { errorHandler } = require('../../../libs/error-handler/error-handler');
-const { logger } = require('../../../libs/logging/logging');
-const app = express();
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3010'],
-    credentials: true
-}));
+
+// Configure CORS middleware to allow access from all origins
+if (process.env.NODE_ENV !== "development") {
+    app.use(
+        cors({
+            exposedHeaders: ["Cookie", "Authorization"], // Expose specific headers
+            credentials: true, // Allow credentials (e.g., cookies)
+            origin: process.env.ACCESS_CONTROL_ALLOW_ORIGIN, // Allow access from all origins
+        })
+    );
+}
 
 // Rate limiting
 const limiter = rateLimit({
@@ -26,22 +44,24 @@ const limiter = rateLimit({
 });
 app.use('/api/auth', limiter);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// Middleware for parsing URL-encoded and JSON request bodies
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => logger.info('Connected to MongoDB'))
-    .catch(err => logger.error('MongoDB connection error:', err));
+// Middleware for parsing cookies
+app.use(cookieParser());
+
+// HTTP request logger middleware (Morgan) with "tiny" format
+app.use(morgan("tiny"));
+
+// Serve static files from the "media" directory
+app.use("/media", express.static(path.join(__dirname, "storage", "upload")));
 
 // Redis connection
 const redisClient = redis.createClient({
     url: process.env.REDIS_URL
 });
+
 
 redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 redisClient.connect().then(() => {
@@ -51,8 +71,9 @@ redisClient.connect().then(() => {
 // Make redis client available to routes
 app.locals.redisClient = redisClient;
 
-// Routes
+// Define routes with tags
 app.use('/api/auth', authRoutes);
+
 
 // Health check
 app.get('/health', (req, res) => {
@@ -65,9 +86,4 @@ app.get('/health', (req, res) => {
 
 // Error handling middleware
 app.use(errorHandler);
-
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-    logger.info(`Auth service running on port ${PORT}`);
-});
+module.exports = app;
