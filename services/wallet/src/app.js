@@ -7,8 +7,8 @@ const redis = require('redis');
 require('dotenv').config();
 
 const walletRoutes = require('./routes/walletRoutes');
-const { errorHandler } = require('../../libs/error-handler');
-const { logger, requestLogger } = require('../../libs/logging');
+const { errorHandler } = require('../../../libs/error-handler/error-handler');
+const { logger, requestLogger } = require('../../../libs/logging/logging');
 
 const app = express();
 

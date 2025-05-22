@@ -2,8 +2,8 @@ const Joi = require('joi');
 const axios = require('axios');
 const Contest = require('../models/Contest');
 const Portfolio = require('../models/Portfolio');
-const { logger } = require('../../../libs/logging');
-const { ValidationError, NotFoundError, ConflictError, asyncHandler } = require('../../../libs/error-handler');
+const { logger } = require('../../../../libs/logging/logging');
+const { ValidationError, NotFoundError, ConflictError, asyncHandler } = require('../../../../libs/error-handler/error-handler');
 
 // Validation schemas
 const createContestSchema = Joi.object({
@@ -56,26 +56,26 @@ exports.getContests = asyncHandler(async (req, res) => {
   const featured = req.query.featured;
   const minEntryFee = req.query.minEntryFee;
   const maxEntryFee = req.query.maxEntryFee;
-  
+
   // Build filter query
   const filter = { isActive: true };
-  
+
   if (status) filter.status = status;
   if (type) filter.type = type;
   if (featured !== undefined) filter.featured = featured === 'true';
   if (minEntryFee) filter.entryFee = { ...filter.entryFee, $gte: parseInt(minEntryFee) };
   if (maxEntryFee) filter.entryFee = { ...filter.entryFee, $lte: parseInt(maxEntryFee) };
-  
+
   const skip = (page - 1) * limit;
-  
+
   const contests = await Contest.find(filter)
     .sort({ featured: -1, startTime: 1 })
     .skip(skip)
     .limit(limit)
     .lean();
-  
+
   const total = await Contest.countDocuments(filter);
-  
+
   res.json({
     success: true,
     contests,
@@ -92,13 +92,13 @@ exports.getContests = asyncHandler(async (req, res) => {
 // Get single contest by ID
 exports.getContest = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  
+
   const contest = await Contest.findById(id);
-  
+
   if (!contest) {
     throw new NotFoundError('Contest not found');
   }
-  
+
   res.json({
     success: true,
     contest
@@ -111,33 +111,33 @@ exports.createContest = asyncHandler(async (req, res) => {
   if (error) {
     throw new ValidationError(error.details[0].message);
   }
-  
+
   // Validate prize distribution percentages sum to 100
   const totalPercentage = value.prizeDistribution.reduce((sum, prize) => sum + prize.percentage, 0);
   if (totalPercentage !== 100) {
     throw new ValidationError('Prize distribution percentages must sum to 100%');
   }
-  
+
   // Validate min participants is less than max participants
   if (value.minParticipants >= value.maxParticipants) {
     throw new ValidationError('Minimum participants must be less than maximum participants');
   }
-  
+
   const contest = new Contest({
     ...value,
     createdBy: req.user.id,
     status: 'open'
   });
-  
+
   // Calculate prize amounts (will be updated when contest fills)
   contest.prizeDistribution.forEach(prize => {
     prize.amount = 0; // Will be calculated based on actual prize pool
   });
-  
+
   await contest.save();
-  
+
   logger.info(`Contest created: ${contest.name} by user ${req.user.id}`);
-  
+
   res.status(201).json({
     success: true,
     message: 'Contest created successfully',
@@ -151,27 +151,27 @@ exports.joinContest = asyncHandler(async (req, res) => {
   if (error) {
     throw new ValidationError(error.details[0].message);
   }
-  
+
   const { contestId } = value;
   const userId = req.user.id;
-  
+
   const contest = await Contest.findById(contestId);
-  
+
   if (!contest) {
     throw new NotFoundError('Contest not found');
   }
-  
+
   // Check if contest is joinable
   if (!contest.registrationOpen) {
     throw new ConflictError('Contest registration is closed');
   }
-  
+
   // Check if user already joined
   const existingPortfolio = await Portfolio.findOne({ userId, contestId });
   if (existingPortfolio) {
     throw new ConflictError('You have already joined this contest');
   }
-  
+
   // Lock entry fee from user's wallet
   if (contest.entryFee > 0) {
     try {
@@ -191,7 +191,7 @@ exports.joinContest = asyncHandler(async (req, res) => {
       throw new Error('Failed to process entry fee');
     }
   }
-  
+
   // Create portfolio for user
   const portfolio = new Portfolio({
     userId,
@@ -200,22 +200,22 @@ exports.joinContest = asyncHandler(async (req, res) => {
     currentValue: contest.rules.maxPortfolioValue,
     cashBalance: contest.rules.maxPortfolioValue
   });
-  
+
   await portfolio.save();
-  
+
   // Update contest participant count and prize pool
   contest.currentParticipants += 1;
   contest.prizePool += contest.entryFee;
-  
+
   // Update prize amounts based on new prize pool
   contest.prizeDistribution.forEach(prize => {
     prize.amount = (prize.percentage / 100) * contest.prizePool;
   });
-  
+
   await contest.save();
-  
+
   logger.info(`User ${userId} joined contest ${contestId}`);
-  
+
   res.json({
     success: true,
     message: 'Successfully joined contest',
@@ -227,13 +227,13 @@ exports.joinContest = asyncHandler(async (req, res) => {
 exports.getPortfolio = asyncHandler(async (req, res) => {
   const { contestId } = req.params;
   const userId = req.user.id;
-  
+
   const portfolio = await Portfolio.findOne({ userId, contestId }).populate('contestId', 'name status');
-  
+
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found for this contest');
   }
-  
+
   res.json({
     success: true,
     portfolio
@@ -247,45 +247,45 @@ exports.buyStock = asyncHandler(async (req, res) => {
   if (error) {
     throw new ValidationError(error.details[0].message);
   }
-  
+
   const { symbol, quantity } = value;
   const userId = req.user.id;
-  
+
   const portfolio = await Portfolio.findOne({ userId, contestId });
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found');
   }
-  
+
   const contest = await Contest.findById(contestId);
   if (contest.status !== 'active') {
     throw new ConflictError('Contest is not active');
   }
-  
+
   // Get current stock price (mock API call)
   const stockData = await getStockPrice(symbol);
   const totalCost = quantity * stockData.price;
-  
+
   // Check if user has enough cash
   if (portfolio.cashBalance < totalCost) {
     throw new ConflictError('Insufficient cash balance');
   }
-  
+
   // Check contest rules
   const existingPosition = portfolio.positions.find(p => p.symbol === symbol);
   const totalQuantity = existingPosition ? existingPosition.quantity + quantity : quantity;
-  
+
   if (totalQuantity > contest.rules.maxPositionsPerStock) {
     throw new ConflictError(`Maximum ${contest.rules.maxPositionsPerStock} positions allowed per stock`);
   }
-  
+
   if (contest.rules.blockedStocks.includes(symbol)) {
     throw new ConflictError('This stock is not allowed in this contest');
   }
-  
+
   if (contest.rules.allowedSectors.length > 0 && !contest.rules.allowedSectors.includes(stockData.sector)) {
     throw new ConflictError('This sector is not allowed in this contest');
   }
-  
+
   // Add position
   portfolio.addPosition({
     symbol,
@@ -295,11 +295,11 @@ exports.buyStock = asyncHandler(async (req, res) => {
     currentPrice: stockData.price,
     sector: stockData.sector
   });
-  
+
   await portfolio.save();
-  
+
   logger.info(`User ${userId} bought ${quantity} shares of ${symbol} in contest ${contestId}`);
-  
+
   res.json({
     success: true,
     message: 'Stock purchased successfully',
@@ -314,36 +314,36 @@ exports.sellStock = asyncHandler(async (req, res) => {
   if (error) {
     throw new ValidationError(error.details[0].message);
   }
-  
+
   const { symbol, quantity } = value;
   const userId = req.user.id;
-  
+
   const portfolio = await Portfolio.findOne({ userId, contestId });
   if (!portfolio) {
     throw new NotFoundError('Portfolio not found');
   }
-  
+
   const contest = await Contest.findById(contestId);
   if (contest.status !== 'active') {
     throw new ConflictError('Contest is not active');
   }
-  
+
   // Get current stock price
   const stockData = await getStockPrice(symbol);
-  
+
   // Update current price in portfolio
   const position = portfolio.positions.find(p => p.symbol === symbol);
   if (position) {
     position.currentPrice = stockData.price;
   }
-  
+
   // Sell position
   portfolio.removePosition(symbol, quantity);
-  
+
   await portfolio.save();
-  
+
   logger.info(`User ${userId} sold ${quantity} shares of ${symbol} in contest ${contestId}`);
-  
+
   res.json({
     success: true,
     message: 'Stock sold successfully',
@@ -356,28 +356,28 @@ exports.getLeaderboard = asyncHandler(async (req, res) => {
   const { contestId } = req.params;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 50;
-  
+
   const contest = await Contest.findById(contestId);
   if (!contest) {
     throw new NotFoundError('Contest not found');
   }
-  
+
   const skip = (page - 1) * limit;
-  
+
   const portfolios = await Portfolio.find({ contestId })
     .sort({ totalPnLPercentage: -1 })
     .skip(skip)
     .limit(limit)
     .populate('userId', 'username firstName lastName avatar')
     .lean();
-  
+
   // Add rank to each portfolio
   portfolios.forEach((portfolio, index) => {
     portfolio.rank = skip + index + 1;
   });
-  
+
   const total = await Portfolio.countDocuments({ contestId });
-  
+
   res.json({
     success: true,
     leaderboard: portfolios,
@@ -403,7 +403,7 @@ exports.getUserContests = asyncHandler(async (req, res) => {
   const status = req.query.status;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
-  
+
   // Build aggregation pipeline
   const pipeline = [
     { $match: { userId: mongoose.Types.ObjectId(userId) } },
@@ -417,19 +417,19 @@ exports.getUserContests = asyncHandler(async (req, res) => {
     },
     { $unwind: '$contest' }
   ];
-  
+
   if (status) {
     pipeline.push({ $match: { 'contest.status': status } });
   }
-  
+
   pipeline.push(
     { $sort: { 'contest.startTime': -1 } },
     { $skip: (page - 1) * limit },
     { $limit: limit }
   );
-  
+
   const userContests = await Portfolio.aggregate(pipeline);
-  
+
   res.json({
     success: true,
     contests: userContests
@@ -447,16 +447,16 @@ async function getStockPrice(symbol) {
     'AMZN': { price: 3200.00, companyName: 'Amazon.com Inc.', sector: 'Consumer Discretionary' },
     'TSLA': { price: 800.25, companyName: 'Tesla Inc.', sector: 'Consumer Discretionary' }
   };
-  
+
   if (!mockStocks[symbol]) {
     throw new NotFoundError(`Stock ${symbol} not found`);
   }
-  
+
   // Add some random price fluctuation (±2%)
   const basePrice = mockStocks[symbol].price;
   const fluctuation = (Math.random() - 0.5) * 0.04; // ±2%
   const currentPrice = basePrice * (1 + fluctuation);
-  
+
   return {
     ...mockStocks[symbol],
     price: Math.round(currentPrice * 100) / 100

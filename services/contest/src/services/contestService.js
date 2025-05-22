@@ -1,6 +1,6 @@
 const Contest = require('../models/Contest');
 const Portfolio = require('../models/Portfolio');
-const { logger } = require('../../../libs/logging');
+const { logger } = require('../../../../libs/logging/logging');
 
 // Service to update contest statuses
 exports.updateContestStatuses = async () => {

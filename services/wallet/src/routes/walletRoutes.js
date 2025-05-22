@@ -1,6 +1,6 @@
 const express = require('express');
 const walletController = require('../controllers/walletController');
-const { verifyToken, requireAdmin } = require('../../../libs/auth-middleware');
+const { verifyToken, requireAdmin } = require('../../../../libs/auth-middleware/auth-middleware');
 
 const router = express.Router();
 

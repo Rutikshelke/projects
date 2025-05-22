@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const User = require('../models/User');
-const { logger } = require('../../../libs/logging');
+const { logger } = require('../../../../libs/logging/logging');
 
 // Validation schemas
 const registerSchema = Joi.object({
@@ -44,7 +44,6 @@ exports.register = async (req, res) => {
                 message: error.details[0].message
             });
         }
-
         const { username, email, password, firstName, lastName } = value;
 
         // Check if user already exists
@@ -54,7 +53,6 @@ exports.register = async (req, res) => {
                 { username: username }
             ]
         });
-
         if (existingUser) {
             return res.status(409).json({
                 success: false,

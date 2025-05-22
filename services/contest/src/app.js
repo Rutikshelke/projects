@@ -8,8 +8,8 @@ const cron = require('node-cron');
 require('dotenv').config();
 
 const contestRoutes = require('./routes/contestRoutes');
-const { errorHandler } = require('../../libs/error-handler');
-const { logger, requestLogger } = require('../../libs/logging');
+const { errorHandler } = require('../../../libs/error-handler/error-handler');
+const { logger, requestLogger } = require('../../../libs/logging/logging');
 const { updateContestStatuses } = require('./services/contestService');
 
 const app = express();

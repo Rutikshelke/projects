@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { logger } = require('../../../libs/logging');
+const { logger } = require('../../../../libs/logging/logging');
 
 exports.authenticateToken = async (req, res, next) => {
     try {

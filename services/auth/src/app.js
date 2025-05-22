@@ -7,9 +7,8 @@ const redis = require('redis');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const { errorHandler } = require('../../libs/error-handler');
-const { logger } = require('../../libs/logging');
-
+const { errorHandler } = require('../../../libs/error-handler/error-handler');
+const { logger } = require('../../../libs/logging/logging');
 const app = express();
 
 // Security middleware

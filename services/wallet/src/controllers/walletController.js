@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const Wallet = require('../models/Wallet');
-const { logger } = require('../../../libs/logging');
-const { ValidationError, NotFoundError, ConflictError, asyncHandler } = require('../../../libs/error-handler');
+const { logger } = require('../../../../libs/logging/logging');
+const { ValidationError, NotFoundError, ConflictError, asyncHandler } = require('../../../../libs/error-handler/error-handler');
 
 // Validation schemas
 const depositSchema = Joi.object({
