@@ -11,8 +11,8 @@
     "dev": "nodemon src/app.js",
     "test": "jest",
     "lint": "eslint src/"
-  }
-    "dependencies": {
+  },
+  "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "eslint": "^9.27.0",
