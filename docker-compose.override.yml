@@ -43,12 +43,12 @@ services:
 
   dashboard:
     volumes:
-      - ./frontend/dashboard:/app
+      - ./clients/dashboard:/app
       - /app/node_modules
     command: npm start
 
   admin-panel:
     volumes:
-      - ./frontend/admin-panel:/app
+      - ./clients/admin-panel:/app
       - /app/node_modules
     command: npm start

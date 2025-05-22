@@ -1,6 +1,6 @@
 const axios = require('axios');
-const { logger } = require('@fantasy-stock/logging');
-const { AuthenticationError, AuthorizationError } = require('@fantasy-stock/error-handler');
+const { logger } = require('../logging/logging');
+const { AuthenticationError, AuthorizationError } = require('../error-handler/error-handler');
 
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-service:3001';
 

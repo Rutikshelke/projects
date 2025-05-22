@@ -1,11 +1,15 @@
 {
-  "name": "@fantasy-stock/auth-middleware",
+  "name": "fantasy-auth-middleware",
   "version": "1.0.0",
   "description": "Shared authentication middleware for fantasy stock microservices",
-  "main": "index.js",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "auth-middleware.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
-    "axios": "^1.5.0",
-    "@fantasy-stock/logging": "file:../logging",
-    "@fantasy-stock/error-handler": "file:../error-handler"
+    "axios": "^1.9.0"
   }
 }

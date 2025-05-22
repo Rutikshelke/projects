@@ -1,12 +1,20 @@
 {
-  "name": "fantasy-stock-monorepo",
+  "name": "stock-fantasy-simulator",
   "version": "1.0.0",
+  "description": "stock-fantasy-simulator",
+  "license": "ISC",
+  "author": "",
   "private": true,
+  "type": "commonjs",
+  "main": "index.js",
   "workspaces": [
     "services/*",
     "frontend/*",
     "libs/*"
   ],
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
     "dev": "docker-compose up",
     "build": "./scripts/build-all.sh",
@@ -25,9 +33,9 @@
     "start:dashboard": "cd frontend/dashboard && npm start",
     "start:admin-panel": "cd frontend/admin-panel && npm start"
   },
-  "devDependencies": {
-    "lerna": "^6.6.2",
-    "concurrently": "^8.2.0",
-    "nodemon": "^3.0.1"
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "lerna": "^8.2.2",
+    "nodemon": "^3.1.10"
   }
 }

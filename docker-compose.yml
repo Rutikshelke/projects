@@ -199,7 +199,7 @@ services:
   # Frontend Applications
   dashboard:
     build:
-      context: ./frontend/dashboard
+      context: ./clients/dashboard
       dockerfile: Dockerfile
     container_name: fantasy-dashboard
     restart: unless-stopped
@@ -212,7 +212,7 @@ services:
 
   admin-panel:
     build:
-      context: ./frontend/admin-panel
+      context: ./clients/admin-panel
       dockerfile: Dockerfile
     container_name: fantasy-admin-panel
     restart: unless-stopped
