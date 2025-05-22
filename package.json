@@ -17,7 +17,8 @@
   "workspaces": [
     "services/*",
     "clients/*",
-    "libs/*"
+    "libs/*",
+    "packages/*"
   ],
   "directories": {
     "doc": "docs"
