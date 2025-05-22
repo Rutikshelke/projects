@@ -1,0 +1,10 @@
+{
+  "name": "@fantasy-stock/logging",
+  "version": "1.0.0",
+  "description": "Shared logging utility for fantasy stock microservices",
+  "main": "index.js",
+  "dependencies": {
+    "winston": "^3.10.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  }
+}

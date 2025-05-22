@@ -1,0 +1,9 @@
+{
+  "name": "@fantasy-stock/error-handler",
+  "version": "1.0.0",
+  "description": "Shared error handling utility for fantasy stock microservices",
+  "main": "index.js",
+  "dependencies": {
+    "@fantasy-stock/logging": "file:../logging"
+  }
+}

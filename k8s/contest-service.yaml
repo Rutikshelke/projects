@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contest-service
+  namespace: fantasy-stock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contest-service
+  template:
+    metadata:
+      labels:
+        app: contest-service
+    spec:
+      containers:
+        - name: contest-service
+          image: yourdockerhubusername/contest-service:latest
+          ports:
+            - containerPort: 4002
+          envFrom:
+            - secretRef:
+                name: contest-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contest-service
+  namespace: fantasy-stock
+spec:
+  selector:
+    app: contest-service
+  ports:
+    - port: 4002
+      targetPort: 4002

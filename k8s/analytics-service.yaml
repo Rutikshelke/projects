@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: fantasy-stock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+        - name: analytics-service
+          image: yourdockerhubusername/analytics-service:latest
+          ports:
+            - containerPort: 4006
+          envFrom:
+            - secretRef:
+                name: analytics-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: fantasy-stock
+spec:
+  selector:
+    app: analytics-service
+  ports:
+    - port: 4006
+      targetPort: 4006

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leaderboard-service
+  namespace: fantasy-stock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: leaderboard-service
+  template:
+    metadata:
+      labels:
+        app: leaderboard-service
+    spec:
+      containers:
+        - name: leaderboard-service
+          image: yourdockerhubusername/leaderboard-service:latest
+          ports:
+            - containerPort: 4005
+          envFrom:
+            - secretRef:
+                name: leaderboard-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: leaderboard-service
+  namespace: fantasy-stock
+spec:
+  selector:
+    app: leaderboard-service
+  ports:
+    - port: 4005
+      targetPort: 4005

@@ -1,0 +1,254 @@
+version: "3.8"
+
+services:
+  # Databases
+  mongodb:
+    image: mongo:6.0
+    container_name: fantasy-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: fantasy_stock
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - fantasy-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: fantasy-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - fantasy-network
+
+  # Backend Services
+  auth-service:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: fantasy-auth-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-jwt-secret-key
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - fantasy-network
+
+  wallet-service:
+    build:
+      context: ./services/wallet
+      dockerfile: Dockerfile
+    container_name: fantasy-wallet-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongodb
+      - redis
+      - auth-service
+    networks:
+      - fantasy-network
+
+  contest-service:
+    build:
+      context: ./services/contest
+      dockerfile: Dockerfile
+    container_name: fantasy-contest-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - WALLET_SERVICE_URL=http://wallet-service:3002
+    ports:
+      - "3003:3003"
+    depends_on:
+      - mongodb
+      - redis
+      - auth-service
+      - wallet-service
+    networks:
+      - fantasy-network
+
+  scoring-service:
+    build:
+      context: ./services/scoring
+      dockerfile: Dockerfile
+    container_name: fantasy-scoring-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - CONTEST_SERVICE_URL=http://contest-service:3003
+    ports:
+      - "3004:3004"
+    depends_on:
+      - mongodb
+      - redis
+      - contest-service
+    networks:
+      - fantasy-network
+
+  notification-service:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    container_name: fantasy-notification-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - EMAIL_SERVICE_API_KEY=your-email-api-key
+      - PUSH_SERVICE_KEY=your-push-service-key
+    ports:
+      - "3005:3005"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - fantasy-network
+
+  leaderboard-service:
+    build:
+      context: ./services/leaderboard
+      dockerfile: Dockerfile
+    container_name: fantasy-leaderboard-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - SCORING_SERVICE_URL=http://scoring-service:3004
+    ports:
+      - "3006:3006"
+    depends_on:
+      - mongodb
+      - redis
+      - scoring-service
+    networks:
+      - fantasy-network
+
+  analytics-service:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    container_name: fantasy-analytics-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3007
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3007:3007"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - fantasy-network
+
+  admin-service:
+    build:
+      context: ./services/admin-service
+      dockerfile: Dockerfile
+    container_name: fantasy-admin-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3008
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/fantasy_stock?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    ports:
+      - "3008:3008"
+    depends_on:
+      - mongodb
+      - redis
+      - auth-service
+    networks:
+      - fantasy-network
+
+  # Frontend Applications
+  dashboard:
+    build:
+      context: ./frontend/dashboard
+      dockerfile: Dockerfile
+    container_name: fantasy-dashboard
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8080/api
+    ports:
+      - "3000:3000"
+    networks:
+      - fantasy-network
+
+  admin-panel:
+    build:
+      context: ./frontend/admin-panel
+      dockerfile: Dockerfile
+    container_name: fantasy-admin-panel
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8080/api
+      - REACT_APP_ADMIN_API_URL=http://localhost:3008
+    ports:
+      - "3010:3000"
+    networks:
+      - fantasy-network
+
+  # API Gateway / Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: fantasy-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - wallet-service
+      - contest-service
+      - scoring-service
+      - notification-service
+      - leaderboard-service
+      - analytics-service
+      - admin-service
+    networks:
+      - fantasy-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  fantasy-network:
+    driver: bridge

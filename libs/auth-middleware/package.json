@@ -1,0 +1,11 @@
+{
+  "name": "@fantasy-stock/auth-middleware",
+  "version": "1.0.0",
+  "description": "Shared authentication middleware for fantasy stock microservices",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.5.0",
+    "@fantasy-stock/logging": "file:../logging",
+    "@fantasy-stock/error-handler": "file:../error-handler"
+  }
+}

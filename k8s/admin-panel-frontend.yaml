@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-panel-frontend
+  namespace: fantasy-stock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-panel-frontend
+  template:
+    metadata:
+      labels:
+        app: admin-panel-frontend
+    spec:
+      containers:
+        - name: admin-panel-frontend
+          image: yourdockerhubusername/admin-panel-frontend:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: admin-panel-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-panel-frontend
+  namespace: fantasy-stock
+spec:
+  selector:
+    app: admin-panel-frontend
+  ports:
+    - port: 80
+      targetPort: 80

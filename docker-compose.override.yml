@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  auth-service:
+    volumes:
+      - ./services/auth:/app
+    command: npm run dev
+
+  wallet-service:
+    volumes:
+      - ./services/wallet:/app
+    command: npm run dev
+
+  contest-service:
+    volumes:
+      - ./services/contest:/app
+    command: npm run dev
+
+  scoring-service:
+    volumes:
+      - ./services/scoring:/app
+    command: npm run dev
+
+  notification-service:
+    volumes:
+      - ./services/notification:/app
+    command: npm run dev
+
+  leaderboard-service:
+    volumes:
+      - ./services/leaderboard:/app
+    command: npm run dev
+
+  analytics-service:
+    volumes:
+      - ./services/analytics:/app
+    command: npm run dev
+
+  admin-service:
+    volumes:
+      - ./services/admin-service:/app
+    command: npm run dev
+
+  dashboard:
+    volumes:
+      - ./frontend/dashboard:/app
+      - /app/node_modules
+    command: npm start
+
+  admin-panel:
+    volumes:
+      - ./frontend/admin-panel:/app
+      - /app/node_modules
+    command: npm start

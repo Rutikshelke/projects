@@ -1,0 +1,33 @@
+{
+  "name": "fantasy-stock-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "dev": "docker-compose up",
+    "build": "./scripts/build-all.sh",
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "clean": "lerna clean",
+    "bootstrap": "lerna bootstrap",
+    "start:auth": "cd services/auth && npm start",
+    "start:wallet": "cd services/wallet && npm start",
+    "start:contest": "cd services/contest && npm start",
+    "start:scoring": "cd services/scoring && npm start",
+    "start:notification": "cd services/notification && npm start",
+    "start:leaderboard": "cd services/leaderboard && npm start",
+    "start:analytics": "cd services/analytics && npm start",
+    "start:admin": "cd services/admin-service && npm start",
+    "start:dashboard": "cd frontend/dashboard && npm start",
+    "start:admin-panel": "cd frontend/admin-panel && npm start"
+  },
+  "devDependencies": {
+    "lerna": "^6.6.2",
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.1"
+  }
+}

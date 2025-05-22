@@ -1,0 +1,90 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fantasy-stock-ingress
+  namespace: fantasy-stock
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: dashboard.fantasy-stock.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dashboard-frontend
+                port:
+                  number: 3000
+
+    - host: admin.fantasy-stock.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-panel-frontend
+                port:
+                  number: 3010
+
+    - host: api.fantasy-stock.local
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 4000
+          - path: /wallet
+            pathType: Prefix
+            backend:
+              service:
+                name: wallet-service
+                port:
+                  number: 4001
+          - path: /contest
+            pathType: Prefix
+            backend:
+              service:
+                name: contest-service
+                port:
+                  number: 4002
+          - path: /scoring
+            pathType: Prefix
+            backend:
+              service:
+                name: scoring-service
+                port:
+                  number: 4003
+          - path: /notification
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 4004
+          - path: /leaderboard
+            pathType: Prefix
+            backend:
+              service:
+                name: leaderboard-service
+                port:
+                  number: 4005
+          - path: /analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: analytics-service
+                port:
+                  number: 4006
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-service
+                port:
+                  number: 4007
