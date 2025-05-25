@@ -1,4 +1,4 @@
-const { servers } = require('../config/servers.json');
+const { servers } = require('../configs/servers.json');
 const axios = require('axios');
 const { performance } = require('perf_hooks');
 const { trackResponseTime } = require('../utils/responseTimer');

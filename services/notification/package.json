@@ -15,6 +15,7 @@
     "lint:fix": "eslint src --ext .js --fix"
   },
   "dependencies": {
+    "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -28,6 +29,8 @@
     "morgan": "^1.10.0",
     "node-cron": "^4.0.6",
     "nodemon": "^3.1.10",
+    "path": "^0.12.7",
+    "perf_hooks": "^0.0.1",
     "redis": "^5.1.0",
     "supertest": "^7.1.1",
     "swagger-jsdoc": "^6.2.8",

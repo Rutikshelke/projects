@@ -1,9 +1,8 @@
 {
-    "servers": [
-      { "host": "localhost", "port": 8081, "timeouts": 500, "avgResponseTime": 0 },
-      { "host": "localhost", "port": 8082, "timeouts": 800, "avgResponseTime": 0 },
-      { "host": "localhost", "port": 8083, "timeouts": 200, "avgResponseTime": 0 },
-      { "host": "localhost", "port": 8084, "timeouts": 900, "avgResponseTime": 0 }
-    ]
-  }
-  
+  "servers": [
+    { "host": "localhost", "port": 8081, "timeouts": 500, "avgResponseTime": 0 },
+    { "host": "localhost", "port": 8082, "timeouts": 800, "avgResponseTime": 0 },
+    { "host": "localhost", "port": 8083, "timeouts": 200, "avgResponseTime": 0 },
+    { "host": "localhost", "port": 8084, "timeouts": 900, "avgResponseTime": 0 }
+  ]
+}
