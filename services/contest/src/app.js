@@ -1,66 +1,85 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const redis = require('redis');
-const cron = require('node-cron');
-require('dotenv').config();
-
-const contestRoutes = require('./routes/contestRoutes');
-const { errorHandler } = require('../../../libs/error-handler/error-handler');
-const { logger, requestLogger } = require('../../../libs/logging/logging');
-const { updateContestStatuses } = require('./services/contestService');
+const express = require("express");
 
 const app = express();
 
+const cors = require("cors");
+
+const path = require("path");
+
+const morgan = require("morgan");
+
+const cookieParser = require("cookie-parser");
+
+const helmet = require('helmet');
+
+const { connectRedis, getClient } = require("./configs/redis");
+
+require("dotenv").config({ path: ".env" });
+
+
+const { errorHandler } = require('../../../libs/error-handler/error-handler');
+const { logger, requestLogger } = require('../../../libs/logging/logging');
+const rateLimiter = require('./middleware/rateLimiter');
+const corsOptions = require('./configs/cors'); // ✅ Import your config
+const { updateContestStatuses } = require('./services/contest.service');
+
+// Importing and using various
+const loadBalancerRoutes = require('./routes/loadBalancer.routes');
+const swaggerRouter = require("./routes/swagger.routes");
+const contestRoutes = require('./routes/contest.routes');
+
+// Middleware for parsing URL-encoded and JSON request bodies
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+
 // Security middleware
 app.use(helmet());
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3010'],
-    credentials: true
-}));
+
+app.use(cors(corsOptions));
+
+// Load Balancer
+app.use(loadBalancerRoutes);
 
 // Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/contest', limiter);
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use('/api/contest', rateLimiter);
 
 // Request logging
 app.use(requestLogger);
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => logger.info('Connected to MongoDB'))
-    .catch(err => logger.error('MongoDB connection error:', err));
+// Middleware for parsing cookies
+app.use(cookieParser());
 
-// Redis connection
-const redisClient = redis.createClient({
-    url: process.env.REDIS_URL
-});
+// HTTP request logger middleware (Morgan) with "tiny" format
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
-redisClient.on('error', (err) => logger.error('Redis Client Error', err));
-redisClient.connect().then(() => {
-    logger.info('Connected to Redis');
-}).catch(err => logger.error('Redis connection error:', err));
+// Serve static files from the "media" directory
+app.use("/media", express.static(path.join(__dirname, "storage", "upload")));
 
-app.locals.redisClient = redisClient;
 
-// Routes
+// ✅ Connect to Redis
+(async () => {
+    try {
+        const redisClient = await connectRedis();
+        app.locals.redisClient = redisClient;
+        logger.info("✅ Redis connected and client attached to app.locals");
+    } catch (err) {
+        logger.error("❌ Failed to connect to Redis:", err);
+        process.exit(1); // Fail fast
+    }
+})();
+
+// Make redis client available to routes
+app.locals.redisClient = getClient;
+
+// Serve the Swagger UI using the generated documentation
+app.use('/api/docs', swaggerRouter);
+
+// Define routes with tags
 app.use('/api/contest', contestRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.status(200).json({
         status: 'OK',
         service: 'contest-service',
@@ -68,21 +87,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Cron jobs
-// Update contest statuses every minute
-cron.schedule('* * * * *', () => {
-    updateContestStatuses().catch(err =>
-        logger.error('Error updating contest statuses:', err)
-    );
-});
-
 // Error handling middleware
 app.use(errorHandler);
-
-const PORT = process.env.PORT || 3003;
-
-app.listen(PORT, () => {
-    logger.info(`Contest service running on port ${PORT}`);
-});
 
 module.exports = app;

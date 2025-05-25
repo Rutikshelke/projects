@@ -1,5 +1,6 @@
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
+const os = require('os');
 
 const { combine, timestamp, errors, json, colorize, simple } = winston.format;
 
@@ -13,10 +14,10 @@ const logger = winston.createLogger({
     ),
     defaultMeta: {
         service: process.env.SERVICE_NAME || 'unknown-service',
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        hostname: os.hostname()
     },
     transports: [
-        // Console transport
         new winston.transports.Console({
             format: combine(
                 colorize(),
@@ -28,15 +29,13 @@ const logger = winston.createLogger({
             )
         }),
 
-        // File transport for errors
         new winston.transports.File({
             filename: 'logs/error.log',
             level: 'error',
-            maxsize: 5242880, // 5MB
+            maxsize: 5 * 1024 * 1024, // 5MB
             maxFiles: 5
         }),
 
-        // Daily rotate file transport for all logs
         new DailyRotateFile({
             filename: 'logs/application-%DATE%.log',
             datePattern: 'YYYY-MM-DD',
@@ -59,21 +58,27 @@ const requestLogger = (req, res, next) => {
 
     res.on('finish', () => {
         const duration = Date.now() - start;
+
         const logData = {
             method: req.method,
             url: req.originalUrl,
             statusCode: res.statusCode,
             duration: `${duration}ms`,
             userAgent: req.get('User-Agent'),
-            ip: req.ip || req.connection.remoteAddress,
-            userId: req.user?.userId
+            ip: req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress,
+            userId: req.user?.userId || null,
+            headers: req.headers,
+            query: req.query,
+            body: req.method !== 'GET' && req.body ? req.body : undefined // Avoid logging sensitive GET requests
         };
 
-        if (res.statusCode >= 400) {
-            logger.warn('HTTP Request', logData);
-        } else {
-            logger.info('HTTP Request', logData);
-        }
+        const level = res.statusCode >= 500
+            ? 'error'
+            : res.statusCode >= 400
+                ? 'warn'
+                : 'info';
+
+        logger.log(level, 'HTTP Request', logData);
     });
 
     next();

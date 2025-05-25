@@ -17,8 +17,6 @@ const http = require("http").createServer(app);
 // Connect to the database
 connectToDatabase();
 
-
-
 // Define the port for the server to listen on
 const port = process.env.PORT || 8000;
 

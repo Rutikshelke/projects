@@ -1,4 +1,5 @@
-FROM node:18-alpine
+# 🏗 Stage 1: Builder (Installs Dependencies & Builds App)
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -7,8 +8,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy source code
-COPY src/ ./src/
-COPY ../../libs ./libs/
+COPY ../../../libs ./libs/
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs

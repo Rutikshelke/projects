@@ -16,7 +16,7 @@ const options = {
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'Chat API Documentation',
+            title: 'Notification API Documentation',
             version: '1.0.0',
             description: 'Documentation for your APIs',
         },

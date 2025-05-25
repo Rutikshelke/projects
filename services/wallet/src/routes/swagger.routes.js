@@ -6,7 +6,7 @@ const swaggerDocument = require('../swaggers/swagger');
 // Serve General API Docs
 // Serve General API Docs - No conflicts here
 router.use(
-    '/general',
+    '/',
     swaggerUi.serveFiles(swaggerDocument, {}),
     swaggerUi.setup(swaggerDocument)
 );
