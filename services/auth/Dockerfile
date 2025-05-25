@@ -1,22 +1,19 @@
 FROM node:18-alpine
 
+LABEL Name="fantasy-auth-service" \
+      Version="1.0.0" \
+      Maintainer="Your Name <your.email@example.com>" \
+      Description="Authentication service for Fantasy Stock Market"
+
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-RUN npm ci --only=production
+COPY services/auth/package.json ./
+RUN npm install
+
 
 # Copy source code
-COPY src/ ./src/
+COPY services/auth ./
+COPY ../../../libs ./
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodeuser -u 1001
 
-# Change ownership of the app directory
-RUN chown -R nodeuser:nodejs /app
-USER nodeuser
-
-EXPOSE 3001
-
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]

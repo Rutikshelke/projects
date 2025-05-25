@@ -6,5 +6,7 @@ COPY package.json ./
 RUN npm install
 
 COPY . .
+# Copy source code
+COPY ../../../libs ./libs/
 
 CMD ["npm", "run", "start"]

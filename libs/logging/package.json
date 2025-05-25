@@ -7,6 +7,16 @@
   "type": "commonjs",
   "main": "logging.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "clean": "lerna clean"
+  },
+  "dependencies": {
+    "fantasy-logging": "file:"
+  },
+  "devDependencies": {
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0"
   }
 }
