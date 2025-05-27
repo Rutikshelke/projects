@@ -26,7 +26,8 @@
     "start:notification": "cd services/notification && npm start",
     "start:leaderboard": "cd services/leaderboard && npm start",
     "start:analytics": "cd services/analytics && npm start",
-    "start:admin": "cd services/admin-service && npm start"
+    "start:admin": "cd services/admin-service && npm start",
+    "start:admin-panel": "cd frontend/admin-panel && npm start"
   },
   "repository": {
     "type": "git",

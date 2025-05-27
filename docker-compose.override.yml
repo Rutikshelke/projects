@@ -41,4 +41,8 @@ services:
       - ./services/admin-service:/app
     command: npm run dev
 
-
+  admin-panel:
+    volumes:
+      - ./clients/admin-panel:/app
+      - /app/node_modules
+    command: npm start
