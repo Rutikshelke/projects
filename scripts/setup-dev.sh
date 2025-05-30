@@ -28,8 +28,8 @@ for service in auth wallet contest scoring notification leaderboard analytics ad
 done
 
 for frontend in dashboard admin-panel; do
-    if [ ! -f "frontend/$frontend/.env" ]; then
-        cp "frontend/$frontend/.env.example" "frontend/$frontend/.env"
+    if [ ! -f "clients/$frontend/.env" ]; then
+        cp "clients/$frontend/.env.example" "clients/$frontend/.env"
         echo "✅ Created .env for $frontend"
     fi
 done

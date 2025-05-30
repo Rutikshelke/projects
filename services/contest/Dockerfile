@@ -1,23 +1,20 @@
-FROM node:18-alpine
+# Stage 1: Build dependencies
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
-# Copy source code
-COPY src/ ./src/
-COPY ../../libs ./libs/
+COPY . .
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodeuser -u 1001
+# Stage 2: Run service
+FROM node:20-alpine
 
-# Change ownership of the app directory
-RUN chown -R nodeuser:nodejs /app
-USER nodeuser
+WORKDIR /app
 
-EXPOSE 3003
+COPY --from=builder /app /app
 
-CMD ["npm", "start"]
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

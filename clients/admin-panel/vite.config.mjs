@@ -7,6 +7,7 @@ import svgr from '@svgr/rollup';
 
 export default defineConfig({
   resolve: {
+    preserveSymlinks: true,
     alias: {
       src: resolve(process.cwd(), 'src'),
     },

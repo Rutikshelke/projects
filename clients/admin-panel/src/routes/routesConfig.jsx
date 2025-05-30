@@ -8,7 +8,7 @@ import ResetPassword from "../pages/authentication/ResetPassword";
 
 
 // Dashboard Routes
-import Dashboard from "../pages/Dashboard/Dashboard";
+import Dashboard from "../pages/dashboard/Dashboard";
 
 
 

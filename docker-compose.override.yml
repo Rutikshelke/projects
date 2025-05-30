@@ -45,4 +45,10 @@ services:
     volumes:
       - ./clients/admin-panel:/app
       - /app/node_modules
-    command: npm start
+    command: npm run dev
+
+  landing-page-service:
+    volumes:
+      - ./clients/admin-panel:/app
+      - /app/node_modules
+    command: npm run dev

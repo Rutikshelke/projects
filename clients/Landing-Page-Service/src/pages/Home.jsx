@@ -3,7 +3,7 @@ import React from 'react'
 export default function Home() {
     return (
         <div>
-            Home Page
+            <h1 className="text-4xl font-bold text-center mt-10">Welcome to Our Landing Page</h1>
         </div>
     )
 }

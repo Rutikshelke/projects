@@ -1,19 +1,20 @@
-FROM node:18-alpine
-
-LABEL Name="fantasy-auth-service" \
-      Version="1.0.0" \
-      Maintainer="Your Name <your.email@example.com>" \
-      Description="Authentication service for Fantasy Stock Market"
+# Stage 1: Build dependencies
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY services/auth/package.json ./
+COPY package*.json ./
 RUN npm install
 
+COPY . .
 
-# Copy source code
-COPY services/auth ./
-COPY ../../../libs ./
+# Stage 2: Run service
+FROM node:20-alpine
 
+WORKDIR /app
 
-CMD ["npm", "run", "start"]
+COPY --from=builder /app /app
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

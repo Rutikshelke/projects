@@ -13,21 +13,22 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "docker-compose up",
-    "build": "node ./scripts/build-all.js",
+    "dev": "node init && docker-compose up",
+    "build": "node init && node ./scripts/build-all.js",
     "test": "lerna run test",
     "lint": "lerna run lint",
     "clean": "lerna clean",
     "bootstrap": "lerna bootstrap",
-    "start:auth": "cd services/auth && npm start",
-    "start:wallet": "cd services/wallet && npm start",
-    "start:contest": "cd services/contest && npm start",
-    "start:scoring": "cd services/scoring && npm start",
-    "start:notification": "cd services/notification && npm start",
-    "start:leaderboard": "cd services/leaderboard && npm start",
-    "start:analytics": "cd services/analytics && npm start",
-    "start:admin": "cd services/admin-service && npm start",
-    "start:admin-panel": "cd frontend/admin-panel && npm start"
+    "start:auth": "node init && cd services/auth && npm start",
+    "start:wallet": "node init && cd services/wallet && npm start",
+    "start:contest": "node init && cd services/contest && npm start",
+    "start:scoring": "node init && cd services/scoring && npm start",
+    "start:notification": "node init && cd services/notification && npm start",
+    "start:leaderboard": "node init && cd services/leaderboard && npm start",
+    "start:analytics": "node init && cd services/analytics && npm start",
+    "start:admin": "node init && cd services/admin-service && npm start",
+    "start:admin-panel": "node init && cd frontend/admin-panel && npm start",
+    "start:all": "node init && node scripts/start-all.js"
   },
   "repository": {
     "type": "git",
@@ -40,7 +41,10 @@
   },
   "homepage": "https://github.com/brighthex/stock-fantasy-simulator#readme",
   "dependencies": {
+    "concurrently": "^9.1.2",
     "lerna": "^8.2.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "stock-fantasy-simulator": "file:"
   }
 }

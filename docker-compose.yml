@@ -43,6 +43,9 @@ services:
       - JWT_SECRET=your-jwt-secret-key
     ports:
       - "3001:3001"
+    volumes:
+      - ./services/auth:/app
+
     depends_on:
       - mongodb
       - redis
@@ -63,6 +66,9 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:3001
     ports:
       - "3002:3002"
+    volumes:
+      - ./services/wallet:/app
+
     depends_on:
       - mongodb
       - redis
@@ -85,6 +91,9 @@ services:
       - WALLET_SERVICE_URL=http://wallet-service:3002
     ports:
       - "3003:3003"
+    volumes:
+      - ./services/contest:/app
+
     depends_on:
       - mongodb
       - redis
@@ -107,6 +116,8 @@ services:
       - CONTEST_SERVICE_URL=http://contest-service:3003
     ports:
       - "3004:3004"
+    volumes:
+      - ./services/scoring:/app
     depends_on:
       - mongodb
       - redis
@@ -129,6 +140,9 @@ services:
       - PUSH_SERVICE_KEY=your-push-service-key
     ports:
       - "3005:3005"
+    volumes:
+      - ./services/notification:/app
+
     depends_on:
       - mongodb
       - redis
@@ -149,6 +163,9 @@ services:
       - SCORING_SERVICE_URL=http://scoring-service:3004
     ports:
       - "3006:3006"
+    volumes:
+      - ./services/leaderboard:/app
+
     depends_on:
       - mongodb
       - redis
@@ -169,6 +186,8 @@ services:
       - REDIS_URL=redis://redis:6379
     ports:
       - "3007:3007"
+    volumes:
+      - ./services/analytics:/app
     depends_on:
       - mongodb
       - redis
@@ -189,6 +208,9 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:3001
     ports:
       - "3008:3008"
+    volumes:
+      - ./services/admin-service:/app
+
     depends_on:
       - mongodb
       - redis
@@ -207,24 +229,30 @@ services:
       - REACT_APP_API_BASE_URL=http://localhost:8080/api
       - REACT_APP_ADMIN_API_URL=http://localhost:3008
     ports:
-      - "3010:3000"
+      - "3010:80"
+    volumes:
+      - ./clients/admin-panel:/app
+      - /app/node_modules
     networks:
       - fantasy-network
 
-  Landing-Page-Service:
+  landing-page-service:
     build:
-      context: ./clients/landing-page
+      context: ./clients/landing-page-service
       dockerfile: Dockerfile
-    container_name: fantasy-landing-page
+    container_name: fantasy-landing-page-service
     restart: unless-stopped
     environment:
       - REACT_APP_API_BASE_URL=http://localhost:8080/api
     ports:
-      - "3011:3000"
+      - "3011:80"
+    volumes:
+      - ./clients/landing-page-service:/app
+      - /app/node_modules
     networks:
       - fantasy-network
-      
-  # API Gateway / Load Balancer
+
+  # API Gateway
   nginx:
     image: nginx:alpine
     container_name: fantasy-nginx

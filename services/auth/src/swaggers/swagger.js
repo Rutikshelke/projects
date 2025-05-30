@@ -10,7 +10,7 @@ const allowedOrigins = isDevelopment
         : [];
 
 // Pick the first origin for Swagger UI (Swagger UI `servers` only takes one base URL)
-const serverUrl = allowedOrigins[0] || 'http://localhost:8000';
+const serverUrl = allowedOrigins[0] || 'http://localhost:3001';
 
 const options = {
     swaggerDefinition: {

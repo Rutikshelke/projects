@@ -7,9 +7,9 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "build": "echo \"No build step required for CommonJS project\"",
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "build": "node init && echo \"No build step required for CommonJS project\"",
+    "start": "node init && node server.js",
+    "dev": "node init && nodemon server.js",
     "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint src --ext .js --fix"

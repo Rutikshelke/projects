@@ -5,7 +5,6 @@
 **/yarn.lock
 
 # Environment files
-**/.env
 **/.env.local
 **/.env.development
 **/.env.production
@@ -32,7 +31,6 @@ out/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 *.swp
 *.swo
 
@@ -55,3 +53,4 @@ lerna-debug.log
 # Optional: Ignore frontend dev server cache (React)
 **/.cache/
 **/.eslintcache
+config.bat

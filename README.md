@@ -64,7 +64,8 @@ Shared Libraries Market Data Feed (Mock/API)
 ## 🧰 Technologies
 
 - **Backend:** Node.js, Express, MongoDB, Redis
-- **Frontend:** React.js (dashboard & admin-panel)
+- **Frontend:** React.js ( admin-panel)
+- **App:** expo native React.js (user ui)
 - **Authentication:** JWT, bcrypt
 - **Notifications:** Nodemailer, Twilio (SMS)
 - **Infrastructure:** Docker, Kubernetes, NGINX
@@ -76,6 +77,7 @@ Shared Libraries Market Data Feed (Mock/API)
 ## 🗂️ Monorepo Folder Structure
 
 stock-fantasy-simulator/
+│
 ├── services/ # Backend microservices
 │ ├── auth/ # Auth Service
 │ ├── wallet/ # Wallet Service
@@ -85,6 +87,7 @@ stock-fantasy-simulator/
 │ ├── leaderboard/ # Leaderboard computation
 │ ├── analytics/ # Analytics & reports
 │ └── admin-service/ # Admin tools
+│ └── api-gateway/ # Admin tools
 │
 ├── frontend/
 │ ├── dashboard/ # User-facing React UI
